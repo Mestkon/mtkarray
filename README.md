@@ -1,5 +1,7 @@
 ## mtkarray
 
+Requires C++17.
+
 ### mtk/array.hpp
 `array<class T, std::size_t N = dynamic_extent>` <br>
 A lightweight replacement for `std::array`, stripping out some of the includes by removing
@@ -18,4 +20,4 @@ A simple fixed capacity vector-like container which is allocated on the stack.
 If `dynamic_extent` is used the capacity is no longer fixed and can be changed (heap allocated).
 The difference between `dynarray<T, dynamic_extent>` and `std::vector` is that
 the capacity is not automatically increased when needed, as this is the responsibility
-of the user.
+of the user, and therefore can be a bit faster in some cases.
