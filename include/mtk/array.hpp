@@ -140,7 +140,11 @@ public:
 
 	constexpr
 	void
-	swap(array& other) noexcept { std::swap(*this, other); }
+	swap(array& other)
+	noexcept(noexcept(std::swap(other, other)))
+	{
+		std::swap(*this, other);
+	}
 };
 
 template<class T>
@@ -305,7 +309,8 @@ template<class T
 	,std::size_t N>
 constexpr
 void
-swap(array<T, N>& a, array<T, N>& b) noexcept
+swap(array<T, N>& a, array<T, N>& b)
+noexcept(noexcept(a.swap(b)))
 {
 	a.swap(b);
 }
