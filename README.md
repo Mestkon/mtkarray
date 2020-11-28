@@ -41,8 +41,8 @@ Undefined behavior:
 - `.front()` if `.empty()`
 - `.back()` if `.empty()`
 - Using iterators not belonging to the same instance.
-- `emplace`ing elements into a container with no capacity left. `.reserve` capacity first.
-- `insert`ing elements into a container with no capacity left. `.reserve` capacity first.
+- `.emplace`ing elements into a container with no capacity left. `.reserve` capacity first.
+- `.insert`ing elements into a container with no capacity left. `.reserve` capacity first.
 - `.push_back`ing elements into a container with no capacity left. `.reserve` capacity first.
 - `.pop_back` an empty container.
 - `.erase(.end())`
