@@ -1,5 +1,5 @@
-#ifndef MTK_ARRAY_DYNAMIC_EXTENT_HPP
-#define MTK_ARRAY_DYNAMIC_EXTENT_HPP
+#ifndef MTK_ARRAY_ALLOC_AWARE_HPP
+#define MTK_ARRAY_ALLOC_AWARE_HPP
 
 #include "./array.hpp"
 
@@ -12,8 +12,6 @@ template<class T
 class array<T, dynamic_extent, Alloc>
 {
 public:
-	using _alloc = std::conditional_t<std::is_same_v<void, Alloc>, std::allocator<T>, Alloc>;
-
 	using value_type = T;
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
@@ -23,7 +21,7 @@ public:
 	using const_pointer = const value_type*;
 	using iterator = pointer;
 	using const_iterator = const_pointer;
-	using allocator_type = typename std::allocator_traits<_alloc>::template rebind_alloc<T>;
+	using allocator_type = typename std::allocator_traits<Alloc>::template rebind_alloc<T>;
 
 	using _alloc_trait = std::allocator_traits<allocator_type>;
 
@@ -84,10 +82,10 @@ public:
 	}
 
 	array(array&& other, const allocator_type& alloc)
-	noexcept(_alloc_trait::is_always_equal) :
+	noexcept(_alloc_trait::is_always_equal::value) :
 		array(alloc)
 	{
-		if constexpr (_alloc_trait::is_always_equal) {
+		if constexpr (_alloc_trait::is_always_equal::value) {
 			this->_simple_swap(other);
 		} else if (alloc == other.get_allocator()) {
 			this->_simple_swap(other);
@@ -111,13 +109,6 @@ public:
 		_alloc_trait::deallocate(m_storage.alloc(), m_storage.data, m_storage.size);
 	}
 
-//	array&
-//	operator=(array rhs) noexcept
-//	{
-//		this->swap(rhs);
-//		return *this;
-//	}
-
 	array&
 	operator=(const array& rhs)
 	{
@@ -136,7 +127,7 @@ public:
 
 	array&
 	operator=(array&& rhs)
-	noexcept(_alloc_trait::is_always_equal)
+	noexcept(_alloc_trait::is_always_equal::value)
 	{
 		if constexpr (_alloc_trait::propagate_on_container_move_assignment::value) {
 			array cp = std::move(rhs);

@@ -35,11 +35,21 @@ inline constexpr
 std::size_t
 dynamic_extent = std::numeric_limits<std::size_t>::max();
 
-
-
 template<class T
 	,std::size_t N = dynamic_extent
-	,class Alloc = void> // void is equivalent to std::allocator<T>
+	,class Alloc = void> // void => new/delete
+class array;
+
+template<class T
+	,class Alloc>
+class array<T, dynamic_extent, Alloc>;
+
+template<class T>
+class array<T, dynamic_extent, void>;
+
+template<class T
+	,std::size_t N
+	,class Alloc>
 class array
 {
 public:
@@ -150,9 +160,167 @@ public:
 	}
 };
 
-template<class T
-	,class Alloc>
-class array<T, dynamic_extent, Alloc>;
+template<class T>
+class array<T, dynamic_extent, void>
+{
+public:
+	using value_type = T;
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
+	using reference = value_type&;
+	using const_reference = const value_type&;
+	using pointer = value_type*;
+	using const_pointer = const value_type*;
+	using iterator = pointer;
+	using const_iterator = const_pointer;
+
+	static constexpr
+	std::size_t
+	extent = dynamic_extent;
+
+
+
+	array() noexcept :
+		array(0)
+	{ }
+
+	explicit
+	array(size_type size) :
+		m_data(size == 0 ? nullptr : new T[size]),
+		m_size(size)
+	{ }
+
+	array(std::initializer_list<value_type> ilist) :
+		array(ilist.size())
+	{
+		this->_copy_range(ilist.begin(), ilist.end());
+	}
+
+	array(const array& other) :
+		array(other.size())
+	{
+		this->_copy_range(other.begin(), other.end());
+	}
+
+	array(array&& other) noexcept :
+		m_data(std::exchange(other.m_data, nullptr)),
+		m_size(std::exchange(other.m_size, 0))
+	{ }
+
+	~array() noexcept
+	{
+		delete[] m_data;
+	}
+
+	array&
+	operator=(array rhs) noexcept
+	{
+		this->swap(rhs);
+		return *this;
+	}
+
+
+
+	reference
+	operator[](size_type idx) { return *(this->begin() + idx); }
+
+	const_reference
+	operator[](size_type idx) const { return *(this->begin() + idx); }
+
+	reference
+	front() { return *this->begin(); }
+
+	const_reference
+	front() const { return *this->begin(); }
+
+	reference
+	back() { return *(this->end() - 1); }
+
+	const_reference
+	back() const { return *(this->end() - 1); }
+
+	pointer
+	data() { return m_data; }
+
+	const_pointer
+	data() const { return m_data; }
+
+
+
+	iterator
+	begin() { return this->data(); }
+
+	const_iterator
+	begin() const { return this->data(); }
+
+	const_iterator
+	cbegin() const { return this->begin(); }
+
+	iterator
+	end() { return (this->data() + this->size()); }
+
+	const_iterator
+	end() const { return (this->data() + this->size()); }
+
+	const_iterator
+	cend() const { return this->end(); }
+
+
+
+	[[nodiscard]]
+	bool
+	empty() const { return (this->size() == 0); }
+
+	size_type
+	size() const { return m_size; }
+
+	size_type
+	max_size() const { return std::numeric_limits<size_type>::max(); }
+
+	void
+	resize(std::size_t size)
+	{
+		if (size == this->size())
+			return;
+
+		array new_arr(size);
+		auto first = this->begin();
+		const auto last = this->end();
+		auto it = new_arr.begin();
+		const auto end = new_arr.end();
+		while ((first != last) && (it != end)) {
+			if constexpr (std::is_nothrow_move_assignable_v<value_type>)
+				*(it++) = std::move(*(first++));
+			else
+				*(it++) = *(first++);
+		}
+
+		this->swap(new_arr);
+	}
+
+
+
+	void
+	swap(array& other) noexcept
+	{
+		std::swap(m_data, other.m_data);
+		std::swap(m_size, other.m_size);
+	}
+
+private:
+	template<class Iter>
+	void
+	_copy_range(Iter first, Iter last)
+	{
+		auto it = this->begin();
+		while (first != last) {
+			*(it++) = *(first++);
+		}
+	}
+
+	pointer m_data;
+	size_type m_size;
+};
 
 template<class T
 	,class... Args>
