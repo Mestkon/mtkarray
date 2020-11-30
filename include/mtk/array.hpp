@@ -27,6 +27,26 @@ struct array_traits<T, 0>
 	using align_type = storage_type;
 };
 
+template<class InputIter
+	,class OutputIter>
+constexpr
+void
+copy_range(InputIter first, InputIter last, OutputIter it)
+{
+	while (first != last)
+		*(it++) = *(first++);
+}
+
+template<class InputIter
+	,class OutputIter>
+constexpr
+void
+move_range(InputIter first, InputIter last, OutputIter it)
+{
+	while (first != last)
+		*(it++) = std::move(*(first++));
+}
+
 } // namespace impl_array
 
 
@@ -186,20 +206,20 @@ public:
 
 	explicit
 	array(size_type size) :
-		m_data(size == 0 ? nullptr : new T[size]),
+		m_data(size == 0 ? nullptr : new value_type[size]),
 		m_size(size)
 	{ }
 
 	array(std::initializer_list<value_type> ilist) :
 		array(ilist.size())
 	{
-		this->_copy_range(ilist.begin(), ilist.end());
+		impl_array::copy_range(ilist.begin(), ilist.end(), this->begin());
 	}
 
 	array(const array& other) :
 		array(other.size())
 	{
-		this->_copy_range(other.begin(), other.end());
+		impl_array::copy_range(other.begin(), other.end(), this->begin());
 	}
 
 	array(array&& other) noexcept :
@@ -284,16 +304,11 @@ public:
 			return;
 
 		array new_arr(size);
-		auto first = this->begin();
-		const auto last = this->end();
-		auto it = new_arr.begin();
-		const auto end = new_arr.end();
-		while ((first != last) && (it != end)) {
-			if constexpr (std::is_nothrow_move_assignable_v<value_type>)
-				*(it++) = std::move(*(first++));
-			else
-				*(it++) = *(first++);
-		}
+		const auto copy_size = (size < this->size() ? size : this->size());
+		if constexpr (std::is_nothrow_move_assignable_v<value_type>)
+			impl_array::move_range(this->begin(), this->begin() + copy_size, new_arr.begin());
+		else
+			impl_array::copy_range(this->begin(), this->begin() + copy_size, new_arr.begin());
 
 		this->swap(new_arr);
 	}
@@ -308,16 +323,6 @@ public:
 	}
 
 private:
-	template<class Iter>
-	void
-	_copy_range(Iter first, Iter last)
-	{
-		auto it = this->begin();
-		while (first != last) {
-			*(it++) = *(first++);
-		}
-	}
-
 	pointer m_data;
 	size_type m_size;
 };

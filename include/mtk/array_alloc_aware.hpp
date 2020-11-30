@@ -62,7 +62,7 @@ public:
 	array(std::initializer_list<value_type> ilist, const allocator_type& alloc = allocator_type()) :
 		array(ilist.size(), alloc)
 	{
-		this->_copy_range(ilist.begin(), ilist.end(), std::false_type());
+		impl_array::copy_range(ilist.begin(), ilist.end(), this->begin());
 	}
 
 	array(const array& other) :
@@ -72,7 +72,7 @@ public:
 	array(const array& other, const allocator_type& alloc) :
 		array(other.size(), alloc)
 	{
-		this->_copy_range(other.begin(), other.end(), std::false_type());
+		impl_array::copy_range(other.begin(), other.end(), this->begin());
 	}
 
 	array(array&& other) noexcept :
@@ -91,7 +91,7 @@ public:
 			this->_simple_swap(other);
 		} else {
 			array tmp(other.size(), alloc);
-			tmp._copy_range(other.begin(), other.end(), std::true_type());
+			impl_array::move_range(other.begin(), other.end(), tmp.begin());
 			this->_simple_swap(tmp);
 		}
 	}
@@ -210,16 +210,11 @@ public:
 			return;
 
 		array new_arr(size, this->get_allocator());
-		auto first = this->begin();
-		const auto last = this->end();
-		auto it = new_arr.begin();
-		const auto end = new_arr.end();
-		while ((first != last) && (it != end)) {
-			if constexpr (std::is_nothrow_move_assignable_v<value_type>)
-				*(it++) = std::move(*(first++));
-			else
-				*(it++) = *(first++);
-		}
+		const auto copy_size = (size < this->size() ? size : this->size());
+		if constexpr (std::is_nothrow_move_assignable_v<value_type>)
+			impl_array::move_range(this->begin(), this->begin() + copy_size, new_arr.begin());
+		else
+			impl_array::copy_range(this->begin(), this->begin() + copy_size, new_arr.begin());
 
 		this->swap(new_arr);
 	}
@@ -238,20 +233,6 @@ public:
 	}
 
 private:
-	template<class Iter
-		,class MoveTrait>
-	void
-	_copy_range(Iter first, Iter last, MoveTrait)
-	{
-		auto it = this->begin();
-		while (first != last) {
-			if constexpr (MoveTrait::value)
-				*(it++) = std::move(*(first++));
-			else
-				*(it++) = *(first++);
-		}
-	}
-
 	void
 	_simple_swap(array& other) {
 		m_storage.data = std::exchange(other.m_storage.data, nullptr);
