@@ -56,23 +56,9 @@ std::size_t
 dynamic_extent = std::numeric_limits<std::size_t>::max();
 
 template<class T
-	,std::size_t N = dynamic_extent
-	,class Alloc = void> // void => new/delete
-class array;
-
-template<class T
-	,class Alloc>
-class array<T, dynamic_extent, Alloc>;
-
-template<class T>
-class array<T, dynamic_extent, void>;
-
-template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N = dynamic_extent>
 class array
 {
-	static_assert(std::is_same_v<Alloc, void>, "Alloc must be void for compile-time sized arrays");
 public:
 	using _trait = impl_array::array_traits<T, N>;
 
@@ -182,7 +168,7 @@ public:
 };
 
 template<class T>
-class array<T, dynamic_extent, void>
+class array<T, dynamic_extent>
 {
 public:
 	using value_type = T;
@@ -335,11 +321,10 @@ array(T&&, Args&&...) -> array<std::common_type_t<std::decay_t<T>, std::decay_t<
 
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 void
-swap(array<T, N, Alloc>& a, array<T, N, Alloc>& b)
+swap(array<T, N>& a, array<T, N>& b)
 noexcept(noexcept(a.swap(b)))
 {
 	a.swap(b);
@@ -348,11 +333,10 @@ noexcept(noexcept(a.swap(b)))
 
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
-operator==(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs)
+operator==(const array<T, N>& lhs, const array<T, N>& rhs)
 {
 	if constexpr (N == dynamic_extent) {
 		if (lhs.size() != rhs.size())
@@ -370,18 +354,16 @@ operator==(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs)
 }
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
-operator!=(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs) { return !(lhs == rhs); }
+operator!=(const array<T, N>& lhs, const array<T, N>& rhs) { return !(lhs == rhs); }
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
-operator<(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs)
+operator<(const array<T, N>& lhs, const array<T, N>& rhs)
 {
 	auto it = lhs.begin();
 	const auto end = lhs.end();
@@ -405,25 +387,23 @@ operator<(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs)
 }
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
-operator>(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs) { return (rhs < lhs); }
+operator>(const array<T, N>& lhs, const array<T, N>& rhs) { return (rhs < lhs); }
 
 template<class T
 	,std::size_t N
 	,class Alloc>
 constexpr
 bool
-operator<=(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs) { return !(rhs < lhs); }
+operator<=(const array<T, N>& lhs, const array<T, N>& rhs) { return !(rhs < lhs); }
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
-operator>=(const array<T, N, Alloc>& lhs, const array<T, N, Alloc>& rhs) { return !(lhs < rhs); }
+operator>=(const array<T, N>& lhs, const array<T, N>& rhs) { return !(lhs < rhs); }
 
 } // namespace mtk
 
