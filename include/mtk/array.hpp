@@ -72,6 +72,7 @@ template<class T
 	,class Alloc>
 class array
 {
+	static_assert(std::is_same_v<Alloc, void>, "Alloc must be void for compile-time sized arrays");
 public:
 	using _trait = impl_array::array_traits<T, N>;
 
