@@ -14,9 +14,6 @@ template<class T
 	,std::size_t N>
 struct array_traits
 {
-	using align_type = std::conditional_t<
-		std::is_same_v<T, char> || std::is_same_v<T, unsigned char>,
-		std::max_align_t, T[N]>;
 	using storage_type = T[N];
 };
 
@@ -24,7 +21,6 @@ template<class T>
 struct array_traits<T, 0>
 {
 	struct storage_type { };
-	using align_type = storage_type;
 };
 
 template<class InputIter
@@ -78,7 +74,6 @@ public:
 
 
 
-	alignas(typename _trait::align_type)
 	typename _trait::storage_type _data;
 
 
