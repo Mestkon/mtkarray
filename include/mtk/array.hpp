@@ -126,11 +126,11 @@ public:
 
 	constexpr
 	iterator
-	end() { return (this->data() + this->size()); }
+	end() { return (this->begin() + this->size()); }
 
 	constexpr
 	const_iterator
-	end() const { return (this->data() + this->size()); }
+	end() const { return (this->begin() + this->size()); }
 
 	constexpr
 	const_iterator
@@ -259,10 +259,10 @@ public:
 	cbegin() const { return this->begin(); }
 
 	iterator
-	end() { return (this->data() + this->size()); }
+	end() { return (this->begin() + this->size()); }
 
 	const_iterator
-	end() const { return (this->data() + this->size()); }
+	end() const { return (this->begin() + this->size()); }
 
 	const_iterator
 	cend() const { return this->end(); }
