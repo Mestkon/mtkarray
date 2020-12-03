@@ -8,7 +8,7 @@
 #include <type_traits>
 
 namespace mtk {
-namespace impl_array {
+namespace impl_container {
 
 template<class T
 	,std::size_t N>
@@ -56,7 +56,7 @@ template<class T
 class array
 {
 public:
-	using _trait = impl_array::array_traits<T, N>;
+	using _trait = impl_container::array_traits<T, N>;
 
 	using value_type = T;
 	using size_type = std::size_t;
@@ -195,13 +195,13 @@ public:
 	array(std::initializer_list<value_type> ilist) :
 		array(ilist.size())
 	{
-		impl_array::copy_range(ilist.begin(), ilist.end(), this->begin());
+		impl_container::copy_range(ilist.begin(), ilist.end(), this->begin());
 	}
 
 	array(const array& other) :
 		array(other.size())
 	{
-		impl_array::copy_range(other.begin(), other.end(), this->begin());
+		impl_container::copy_range(other.begin(), other.end(), this->begin());
 	}
 
 	array(array&& other) noexcept :
@@ -288,9 +288,9 @@ public:
 		array new_arr(size);
 		const auto copy_size = (size < this->size() ? size : this->size());
 		if constexpr (std::is_nothrow_move_assignable_v<value_type>)
-			impl_array::move_range(this->begin(), this->begin() + copy_size, new_arr.begin());
+			impl_container::move_range(this->begin(), this->begin() + copy_size, new_arr.begin());
 		else
-			impl_array::copy_range(this->begin(), this->begin() + copy_size, new_arr.begin());
+			impl_container::copy_range(this->begin(), this->begin() + copy_size, new_arr.begin());
 
 		this->swap(new_arr);
 	}
