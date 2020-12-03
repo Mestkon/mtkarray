@@ -2,7 +2,7 @@
 
 Requires C++17.
 
-### mtk/array.hpp
+### mtk/container/array.hpp
 `array<class T, std::size_t N = dynamic_extent>` <br>
 A lightweight replacement for `std::array`, stripping out some of the includes by removing
 `.at(size_type)`, `std::tuple` conformance and reverse iterators. Also doesn't provide `.fill(const T&)`
