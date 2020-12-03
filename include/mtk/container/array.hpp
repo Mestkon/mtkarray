@@ -1,5 +1,5 @@
-#ifndef MTK_ARRAY_HPP
-#define MTK_ARRAY_HPP
+#ifndef MTK_CONTAINER_ARRAY_HPP
+#define MTK_CONTAINER_ARRAY_HPP
 
 #include <cstddef>
 #include <initializer_list>
