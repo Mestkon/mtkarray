@@ -388,8 +388,7 @@ bool
 operator>(const array<T, N>& lhs, const array<T, N>& rhs) { return (rhs < lhs); }
 
 template<class T
-	,std::size_t N
-	,class Alloc>
+	,std::size_t N>
 constexpr
 bool
 operator<=(const array<T, N>& lhs, const array<T, N>& rhs) { return !(rhs < lhs); }
